@@ -106,11 +106,17 @@ const ClickerGame = () => {
       {jogoIniciado && (
         <ImageBackground
         source={require('./assets/Porao.gif')}
-        style={[styles.backgroundImage, { width, height }]} // Definindo o tamanho da imagem conforme a tela
-        resizeMode="contain" // Ajusta a imagem para cobrir toda a área disponível
-      >
-          <View style={styles.gameContainer}>
+        style={[styles.backgroundImage, { width, height }]} 
+        resizeMode="contain" >
+           
+           <View style={styles.gameContainer}>
+            
             <Text style={styles.btcText}>BTC: {btc.toFixed(2)}</Text>
+            
+            <TouchableOpacity style={styles.lojaBtn} onPress={() => setModalVisible(true)}>
+              <Text style={styles.btnText}>Abrir Loja</Text>
+            </TouchableOpacity>
+            
             <TouchableOpacity style={styles.hackearBtn} onPress={() => {
               setBtc(prev => {
                 const novoBtc = prev + btcPorClique;
@@ -120,35 +126,40 @@ const ClickerGame = () => {
             }}>
               <Text style={styles.btnText}>Hackear</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.hackearBtn} onPress={() => setModalVisible(true)}>
-              <Text style={styles.btnText}>Abrir Loja</Text>
-            </TouchableOpacity>
+
           </View>
         </ImageBackground>
       )}
 
       {/* Modal de Upgrades */}
       <Modal visible={modalVisible} animationType="slide">
+      <ImageBackground
+        source={require('./assets/lojinha.gif')}
+        style={[styles.backgroundImage, { width, height }]} 
+        resizeMode="contain" >
+                <TouchableOpacity style={styles.closeBtn} onPress={() => setModalVisible(false)}>
+                <Text style={styles.closeBtnText}>X</Text>
+            </TouchableOpacity>
         <View style={styles.upgradeMenu}>
+
+
           {/* Apenas o container de upgrades tem a imagem de fundo */}
-          <ImageBackground source={require('./assets/lojinha.gif')} style={styles.upgradeBackground}>
-            <View style={styles.upgradeContent}>
+            <View style={styles.upgradeContent}>    
               <Text style={styles.headerText}>Upgrades</Text>
               <FlatList
                 data={upgrades}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item, index }) => (
+                  
                   <TouchableOpacity style={styles.upgradeBtn} onPress={() => comprarUpgrade(index)}>
                     <Text style={styles.btnText}>{item.nome} - {item.preco} BTC</Text>
                   </TouchableOpacity>
                 )}
               />
-              <TouchableOpacity style={styles.closeBtn} onPress={() => setModalVisible(false)}>
-                <Text style={styles.btnText}>Fechar</Text>
-              </TouchableOpacity>
-            </View>
-          </ImageBackground>
+
+            </View> 
         </View>
+        </ImageBackground>
       </Modal>
     </View>
   );
@@ -165,6 +176,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   backgroundImage: {
+    backgroundColor: '#16161c',
     position:'absolute',
     flex: 1,
     width: '100%',
@@ -181,7 +193,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.6)',
     width: '70%',
-    height: 500,
+    height: 300,
   },
   headerText: {
     color: '#a3c255',
@@ -195,7 +207,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     borderWidth: 3,
-    borderColor: '#6fa341',
+    borderColor: '#6fa341',    
     cursor: 'pointer',
     fontSize: 18,
     width: '100%',
@@ -225,7 +237,20 @@ const styles = StyleSheet.create({
     color: '#a3c255',
   },
   hackearBtn: {
-    top : '120%',
+    top : '80%',
+    backgroundColor: 'rgba(56, 116, 80, 0.5)',
+    color: '#a3c255',
+    padding: 10,
+    marginBottom: 10,
+    borderWidth: 3,
+    borderColor: '#6fa341',
+    cursor: 'pointer',
+    fontSize: 18,
+    width: '80%',
+    transition: 'background-color 0.3s ease',
+  },
+  lojaBtn: {
+    top : '-100%',
     backgroundColor: 'rgba(56, 116, 80, 0.5)',
     color: '#a3c255',
     padding: 10,
@@ -241,9 +266,8 @@ const styles = StyleSheet.create({
     position: 'fixed',
     top: 0,
     left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    width: '90%',
+    height: '70%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -252,10 +276,8 @@ const styles = StyleSheet.create({
     padding: 20,
     color: 'white',
     textAlign: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     width: '100%',
     height: '80%',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.6)',
     borderRadius: 10,
   },
   upgradeBtn: {
@@ -270,16 +292,25 @@ const styles = StyleSheet.create({
     transition: 'background-color 0.3s ease',
   },
   closeBtn: {
-    backgroundColor: 'rgba(56, 116, 80, 0.5)',
     color: '#a3c255',
-    padding: 10,
-    marginBottom: 10,
+    right:'6%',
+    top:'15.5%',
+    height:50,
+    width:50,
+    position: 'absolute',
+    backgroundColor: 'rgba(252, 0, 0, 0.0)',
+    color: '#a3c255',
     borderWidth: 3,
-    borderColor: '#6fa341',
+    borderColor: 'rgba(252, 0, 0, 0.0)',
     cursor: 'pointer',
-    fontSize: 18,
     transition: 'background-color 0.3s ease',
   },
+
+  closeBtnText:{
+    color: '#16161c',
+    fontSize: 35,
+  }
+
 });
 
 export default ClickerGame;

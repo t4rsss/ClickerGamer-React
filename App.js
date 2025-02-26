@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, FlatList, StyleSheet, ImageBackground ,Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const { width, height } = Dimensions.get('window');  // Obtendo a largura e altura da tela
 
 const ClickerGame = () => {
   const [btc, setBtc] = useState(0);
@@ -41,21 +43,24 @@ const ClickerGame = () => {
     setBtcPorSegundo(segundoSalvo);
   };
 
-  const atualizarDisplay = () => {
-    // Atualiza a exibição do BTC na tela
-  };
-
-  const atualizarLoja = () => {
+  const atualizarLoja = (index) => {
     setUpgrades(prevUpgrades => 
-      prevUpgrades.map(upgrade => ({
-        ...upgrade,
-        preco: Math.ceil(upgrade.preco * 1.8)
-      }))
+      prevUpgrades.map((upgrade, i) => 
+        i === index 
+          ? { ...upgrade, preco: Math.ceil(upgrade.preco * 1.8) } // Aumenta o preço somente do upgrade comprado
+          : upgrade // Mantém os outros upgrades com o mesmo preço
+      )
     );
   };
+  
 
   const iniciarJogo = () => {
+    // Reiniciar o progresso
+    setBtc(0);
+    setBtcPorClique(1);
+    setBtcPorSegundo(0);
     setJogoIniciado(true); // Inicia o jogo
+    salvarProgresso(0, 1, 0); // Salva o progresso inicial
   };
 
   const mostrarMenu = () => {
@@ -64,70 +69,91 @@ const ClickerGame = () => {
 
   const comprarUpgrade = (index) => {
     if (btc >= upgrades[index].preco) {
-      setBtc(prev => prev - upgrades[index].preco);
+      // Decrementa o BTC com base no preço do upgrade
+      setBtc(prev => {
+        const novoBtc = prev - upgrades[index].preco;
+        return novoBtc;
+      });
+      // Aplica o efeito do upgrade
       upgrades[index].efeito();
-      atualizarLoja();
-      salvarProgresso(btc, btcPorClique, btcPorSegundo);
+      // Atualiza os preços da loja após a compra
+      atualizarLoja(index);
+      // Salva o progresso com os valores atuais de BTC, btcPorClique e btcPorSegundo
+      salvarProgresso(btc - upgrades[index].preco, btcPorClique, btcPorSegundo);
     }
   };
+  
+  
 
   return (
     <View style={styles.container}>
       {/* Menu Inicial */}
       {!jogoIniciado && (
-        <View style={styles.menuContainer}>
-          <Text style={styles.headerText}>Hacker Clicker</Text>
-          <TouchableOpacity style={styles.button} onPress={iniciarJogo}>
-            <Text style={styles.btnText}>Novo Jogo</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={iniciarJogo}>
-            <Text style={styles.btnText}>Continuar</Text>
-          </TouchableOpacity>
-        </View>
+        <ImageBackground source={require('./assets/hck1.gif')} style={styles.backgroundImage}>
+          <View style={styles.menuContainer}>
+            <Text style={styles.headerText}>Hacker Clicker</Text>
+            <TouchableOpacity style={styles.button} onPress={iniciarJogo}>
+              <Text style={styles.btnText}>Novo Jogo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={iniciarJogo}>
+              <Text style={styles.btnText}>Continuar</Text>
+            </TouchableOpacity>
+          </View>
+        </ImageBackground>
       )}
 
       {/* Tela do Jogo */}
       {jogoIniciado && (
-        <View style={styles.gameContainer}>
-          <Text style={styles.btcText}>BTC: {btc.toFixed(2)}</Text>
-          <TouchableOpacity style={styles.hackearBtn} onPress={() => {
-            setBtc(prev => {
-              const novoBtc = prev + btcPorClique;
-              salvarProgresso(novoBtc, btcPorClique, btcPorSegundo);
-              return novoBtc;
-            });
-          }}>
-            <Text style={styles.btnText}>Hackear</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.hackearBtn} onPress={() => setModalVisible(true)}>
-            <Text style={styles.btnText}>Abrir Loja</Text>
-          </TouchableOpacity>
-        </View>
+        <ImageBackground
+        source={require('./assets/Porao.gif')}
+        style={[styles.backgroundImage, { width, height }]} // Definindo o tamanho da imagem conforme a tela
+        resizeMode="contain" // Ajusta a imagem para cobrir toda a área disponível
+      >
+          <View style={styles.gameContainer}>
+            <Text style={styles.btcText}>BTC: {btc.toFixed(2)}</Text>
+            <TouchableOpacity style={styles.hackearBtn} onPress={() => {
+              setBtc(prev => {
+                const novoBtc = prev + btcPorClique;
+                salvarProgresso(novoBtc, btcPorClique, btcPorSegundo);
+                return novoBtc;
+              });
+            }}>
+              <Text style={styles.btnText}>Hackear</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.hackearBtn} onPress={() => setModalVisible(true)}>
+              <Text style={styles.btnText}>Abrir Loja</Text>
+            </TouchableOpacity>
+          </View>
+        </ImageBackground>
       )}
 
       {/* Modal de Upgrades */}
       <Modal visible={modalVisible} animationType="slide">
         <View style={styles.upgradeMenu}>
-          <View style={styles.upgradeContent}>
-            <Text style={styles.headerText}>Upgrades</Text>
-            <FlatList
-              data={upgrades}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item, index }) => (
-                <TouchableOpacity style={styles.hackearBtn} onPress={() => comprarUpgrade(index)}>
-                  <Text style={styles.btnText}>{item.nome} - {item.preco} BTC</Text>
-                </TouchableOpacity>
-              )}
-            />
-            <TouchableOpacity style={styles.closeBtn} onPress={() => setModalVisible(false)}>
-              <Text style={styles.btnText}>Fechar</Text>
-            </TouchableOpacity>
-          </View>
+          {/* Apenas o container de upgrades tem a imagem de fundo */}
+          <ImageBackground source={require('./assets/lojinha.gif')} style={styles.upgradeBackground}>
+            <View style={styles.upgradeContent}>
+              <Text style={styles.headerText}>Upgrades</Text>
+              <FlatList
+                data={upgrades}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item, index }) => (
+                  <TouchableOpacity style={styles.upgradeBtn} onPress={() => comprarUpgrade(index)}>
+                    <Text style={styles.btnText}>{item.nome} - {item.preco} BTC</Text>
+                  </TouchableOpacity>
+                )}
+              />
+              <TouchableOpacity style={styles.closeBtn} onPress={() => setModalVisible(false)}>
+                <Text style={styles.btnText}>Fechar</Text>
+              </TouchableOpacity>
+            </View>
+          </ImageBackground>
         </View>
       </Modal>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -137,6 +163,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
     overflow: 'hidden',
+  },
+  backgroundImage: {
+    position:'absolute',
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   menuContainer: {
     alignItems: 'center',
@@ -170,7 +204,7 @@ const styles = StyleSheet.create({
   btnText: {
     color: 'white',
     fontSize: 18,
-    textAlign:'center'
+    textAlign: 'center'
   },
   gameContainer: {
     alignItems: 'center',
@@ -185,11 +219,13 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   btcText: {
+    top : '-100%',
     fontSize: 20,
     marginBottom: 20,
     color: '#a3c255',
   },
   hackearBtn: {
+    top : '120%',
     backgroundColor: 'rgba(56, 116, 80, 0.5)',
     color: '#a3c255',
     padding: 10,
@@ -217,13 +253,13 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    width: '90%',
+    width: '100%',
     height: '80%',
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.6)',
     borderRadius: 10,
   },
   upgradeBtn: {
-    backgroundColor: 'rgba(56, 62, 116, 0.5)',
+    backgroundColor: 'rgba(56, 116, 80, 0.5)',
     color: '#a3c255',
     padding: 10,
     marginBottom: 10,

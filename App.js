@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Modal, FlatList, StyleSheet, ImageBackground ,Dimensions } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');  // Obtendo a largura e altura da tela
 
@@ -10,49 +9,46 @@ const ClickerGame = () => {
   const [btcPorSegundo, setBtcPorSegundo] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [jogoIniciado, setJogoIniciado] = useState(false); // Controle da tela
-  const [upgrades, setUpgrades] = useState([
-    { nome: "Melhor CPU", preco: 10, efeito: () => setBtcPorClique(prev => prev + 1) },
-    { nome: "Hack Automático", preco: 50, efeito: () => setBtcPorSegundo(prev => prev + 1) },
-    { nome: "Proxy Rápido", preco: 100, efeito: () => setBtcPorClique(prev => prev + 2) }
-  ]);
+  const [backgroundImage, setBackgroundImage] = useState(require('./assets/Porao.gif')); // Atualize para o require do arquivo local
+  const [upgrades, setUpgrades] = useState({
+    clique: [
+      { nome: "Divulgar anúncios Falsos", preco: 10, efeito: () => setBtcPorClique(prev => prev + 1) },
+      { nome: "Proxy Rápido", preco: 100, efeito: () => setBtcPorClique(prev => prev + 2) },
+      { nome: "Melhorar Placa Mãe", preco: 400, efeito: () => setBtcPorClique(prev => prev + 50) },
+      { nome: "Melhorar Memória RAM", preco: 300, efeito: () => setBtcPorClique(prev => prev + 20) },
+      { nome: "Contratar Hacker", preco: 1000, efeito: () => setBtcPorClique(prev => prev + 150) },
+      { nome: "Treinar Equipe", preco: 600, efeito: () => setBtcPorClique(prev => prev + 60) },
+      { nome: "Melhorar Ferramentas", preco: 400, efeito: () => setBtcPorClique(prev => prev + 30) },
+    ],
+    producao: [
+      { nome: "Hack Automático", preco: 50, efeito: () => setBtcPorSegundo(prev => prev + 1) },
+      { nome: "Melhorar Placa de Vídeo", preco: 500, efeito: () => setBtcPorSegundo(prev => prev + 50) },
+      { nome: "Melhorar Processador", preco: 700, efeito: () => setBtcPorSegundo(prev => prev + 100) },
+    ],
+    ambiente: [
+      { nome: "Comprar Apartamento", preco: 400000, efeito: () => setBackgroundImage(require('./assets/apartamento.gif'))},
+    ]
+  });
+
+  const [secaoAtiva, setSecaoAtiva] = useState('clique');
 
   useEffect(() => {
-    carregarProgresso();
     const interval = setInterval(() => {
-      setBtc(prev => {
-        const novoBtc = prev + btcPorSegundo;
-        salvarProgresso(novoBtc, btcPorClique, btcPorSegundo);
-        return novoBtc;
-      });
-    }, 1000);
+      setBtc(prev => prev + btcPorSegundo);
+    }, 1000); // A cada 1 segundo
     return () => clearInterval(interval);
-  }, [btcPorSegundo]);
+  }, [btcPorSegundo]); // Atualiza sempre que o BTC por segundo mudar
 
-  const salvarProgresso = async (btc, btcPorClique, btcPorSegundo) => {
-    await AsyncStorage.setItem('btc', btc.toString());
-    await AsyncStorage.setItem('btcPorClique', btcPorClique.toString());
-    await AsyncStorage.setItem('btcPorSegundo', btcPorSegundo.toString());
+  const atualizarLoja = (index, categoria) => {
+    // Atualizando corretamente o estado de upgrades com base no índice e categoria
+    setUpgrades(prevUpgrades => {
+      const updatedUpgrades = { ...prevUpgrades };
+      updatedUpgrades[categoria] = updatedUpgrades[categoria].map((upgrade, i) => 
+        i === index ? { ...upgrade, preco: Math.ceil(upgrade.preco * 2.5) } : upgrade
+      );
+      return updatedUpgrades;
+    });
   };
-
-  const carregarProgresso = async () => {
-    const btcSalvo = parseFloat(await AsyncStorage.getItem('btc')) || 0;
-    const cliqueSalvo = parseInt(await AsyncStorage.getItem('btcPorClique')) || 1;
-    const segundoSalvo = parseInt(await AsyncStorage.getItem('btcPorSegundo')) || 0;
-    setBtc(btcSalvo);
-    setBtcPorClique(cliqueSalvo);
-    setBtcPorSegundo(segundoSalvo);
-  };
-
-  const atualizarLoja = (index) => {
-    setUpgrades(prevUpgrades => 
-      prevUpgrades.map((upgrade, i) => 
-        i === index 
-          ? { ...upgrade, preco: Math.ceil(upgrade.preco * 1.8) } // Aumenta o preço somente do upgrade comprado
-          : upgrade // Mantém os outros upgrades com o mesmo preço
-      )
-    );
-  };
-  
 
   const iniciarJogo = () => {
     // Reiniciar o progresso
@@ -60,31 +56,28 @@ const ClickerGame = () => {
     setBtcPorClique(1);
     setBtcPorSegundo(0);
     setJogoIniciado(true); // Inicia o jogo
-    salvarProgresso(0, 1, 0); // Salva o progresso inicial
   };
 
   const mostrarMenu = () => {
     setJogoIniciado(false); // Exibe o menu novamente
   };
 
-  const comprarUpgrade = (index) => {
-    if (btc >= upgrades[index].preco) {
-      // Decrementa o BTC com base no preço do upgrade
-      setBtc(prev => {
-        const novoBtc = prev - upgrades[index].preco;
-        return novoBtc;
-      });
-      // Aplica o efeito do upgrade
-      upgrades[index].efeito();
-      // Atualiza os preços da loja após a compra
-      atualizarLoja(index);
-      // Salva o progresso com os valores atuais de BTC, btcPorClique e btcPorSegundo
-      salvarProgresso(btc - upgrades[index].preco, btcPorClique, btcPorSegundo);
+  const comprarUpgrade = (index, categoria) => {
+    if (btc >= upgrades[categoria][index].preco) {
+      setBtc(prev => prev - upgrades[categoria][index].preco);
+      upgrades[categoria][index].efeito();
+      atualizarLoja(index, categoria);
+      // Remove o upgrade "Comprar Apartamento" após a compra
+      if (upgrades[categoria][index].nome === "Comprar Apartamento") {
+        setUpgrades(prevUpgrades => {
+          const newUpgrades = { ...prevUpgrades };
+          newUpgrades[categoria] = newUpgrades[categoria].filter((_, i) => i !== index);
+          return newUpgrades;
+        });
+      }
     }
   };
   
-  
-
   return (
     <View style={styles.container}>
       {/* Menu Inicial */}
@@ -105,60 +98,57 @@ const ClickerGame = () => {
       {/* Tela do Jogo */}
       {jogoIniciado && (
         <ImageBackground
-        source={require('./assets/Porao.gif')}
-        style={[styles.backgroundImage, { width, height }]} 
-        resizeMode="contain" >
-           
-           <View style={styles.gameContainer}>
-            
+          source={backgroundImage} // Agora o fundo é atualizado pelo estado
+          style={[styles.backgroundImage, { width, height }]}
+          resizeMode="contain">
+          <View style={styles.gameContainer}>
             <Text style={styles.btcText}>BTC: {btc.toFixed(2)}</Text>
-            
             <TouchableOpacity style={styles.lojaBtn} onPress={() => setModalVisible(true)}>
               <Text style={styles.btnText}>Abrir Loja</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.hackearBtn} onPress={() => {
-              setBtc(prev => {
-                const novoBtc = prev + btcPorClique;
-                salvarProgresso(novoBtc, btcPorClique, btcPorSegundo);
-                return novoBtc;
-              });
-            }}>
+            <TouchableOpacity style={styles.hackearBtn} onPress={() => setBtc(prev => prev + btcPorClique)}>
               <Text style={styles.btnText}>Hackear</Text>
             </TouchableOpacity>
-
           </View>
         </ImageBackground>
       )}
 
-      {/* Modal de Upgrades */}
       <Modal visible={modalVisible} animationType="slide">
-      <ImageBackground
-        source={require('./assets/lojinha.gif')}
-        style={[styles.backgroundImage, { width, height }]} 
-        resizeMode="contain" >
-                <TouchableOpacity style={styles.closeBtn} onPress={() => setModalVisible(false)}>
-                <Text style={styles.closeBtnText}>X</Text>
+        <ImageBackground source={require('./assets/lojinha.gif')} style={[styles.backgroundImage, { width, height }]} resizeMode="contain">
+          <TouchableOpacity style={styles.closeBtn} onPress={() => setModalVisible(false)}>
+            <Text style={styles.closeBtnText}>X</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.btcText2}>BTC: {btc.toFixed(2)}</Text>
+
+          {/* Botões das seções */}
+          <View style={styles.secaoButtons}>
+            <TouchableOpacity style={styles.secaoBtn} onPress={() => setSecaoAtiva('clique')}>
+              <Text style={styles.btnText}>Clique</Text>
             </TouchableOpacity>
-        <View style={styles.upgradeMenu}>
+            <TouchableOpacity style={styles.secaoBtn} onPress={() => setSecaoAtiva('producao')}>
+              <Text style={styles.btnText}>Produção</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.secaoBtn} onPress={() => setSecaoAtiva('ambiente')}>
+              <Text style={styles.btnText}>Ambiente</Text>
+            </TouchableOpacity>
+          </View>
 
-
-          {/* Apenas o container de upgrades tem a imagem de fundo */}
-            <View style={styles.upgradeContent}>    
-              <Text style={styles.headerText}>Upgrades</Text>
+          {/* Exibição de upgrades de acordo com a seção ativa */}
+          <View style={styles.upgradeMenu}>
+            <View style={styles.upgradeContent}>
+              <Text style={styles.headerText}>{secaoAtiva === 'clique' ? 'Upgrades de Clique' : secaoAtiva === 'producao' ? 'Upgrades de Produção' : 'Upgrades de Ambiente'}</Text>
               <FlatList
-                data={upgrades}
+                data={upgrades[secaoAtiva]}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item, index }) => (
-                  
-                  <TouchableOpacity style={styles.upgradeBtn} onPress={() => comprarUpgrade(index)}>
+                  <TouchableOpacity style={styles.upgradeBtn} onPress={() => comprarUpgrade(index, secaoAtiva)}>
                     <Text style={styles.btnText}>{item.nome} - {item.preco} BTC</Text>
                   </TouchableOpacity>
                 )}
               />
-
-            </View> 
-        </View>
+            </View>
+          </View>
         </ImageBackground>
       </Modal>
     </View>
@@ -167,6 +157,25 @@ const ClickerGame = () => {
 
 
 const styles = StyleSheet.create({
+
+  secaoButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 20,
+  },
+  secaoBtn: {
+    top:'160%',
+    backgroundColor: 'rgba(56, 116, 80, 0.5)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderWidth: 3,
+    borderColor: '#6fa341',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,  // Sombra para dispositivos Android
+  },
+
   container: {
     flex: 1,
     backgroundColor: '#16161c',
@@ -218,6 +227,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center'
   },
+  
   gameContainer: {
     alignItems: 'center',
     display: 'flex',
@@ -236,6 +246,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#a3c255',
   },
+
+  btcText2: {
+    top : '9%',
+    fontSize: 25,
+    marginBottom: 20,
+    color: 'black',
+  },
+
   hackearBtn: {
     top : '80%',
     backgroundColor: 'rgba(56, 116, 80, 0.5)',

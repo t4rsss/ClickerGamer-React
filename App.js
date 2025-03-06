@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Modal, FlatList, StyleSheet, ImageBackground ,Dimensions } from 'react-native';
-
-const { width, height } = Dimensions.get('window');  // Obtendo a largura e altura da tela
+import HUD from "./HUD";
+const { width, height } = Dimensions.get('window');  
 
 const ClickerGame = () => {
   const [btc, setBtc] = useState(0);
   const [btcPorClique, setBtcPorClique] = useState(1);
   const [btcPorSegundo, setBtcPorSegundo] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
-  const [jogoIniciado, setJogoIniciado] = useState(false); // Controle da tela
-  const [backgroundImage, setBackgroundImage] = useState(require('./assets/Porao.gif')); // Atualize para o require do arquivo local
+  const [jogoIniciado, setJogoIniciado] = useState(false); 
+  const [backgroundImage, setBackgroundImage] = useState(require('./assets/Porao.gif')); 
   const [upgrades, setUpgrades] = useState({
     clique: [
       { nome: "Divulgar anúncios Falsos", preco: 10, efeito: () => setBtcPorClique(prev => prev + 1) },
@@ -35,12 +35,11 @@ const ClickerGame = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setBtc(prev => prev + btcPorSegundo);
-    }, 1000); // A cada 1 segundo
+    }, 1000); 
     return () => clearInterval(interval);
-  }, [btcPorSegundo]); // Atualiza sempre que o BTC por segundo mudar
+  }, [btcPorSegundo]); 
 
   const atualizarLoja = (index, categoria) => {
-    // Atualizando corretamente o estado de upgrades com base no índice e categoria
     setUpgrades(prevUpgrades => {
       const updatedUpgrades = { ...prevUpgrades };
       updatedUpgrades[categoria] = updatedUpgrades[categoria].map((upgrade, i) => 
@@ -51,15 +50,14 @@ const ClickerGame = () => {
   };
 
   const iniciarJogo = () => {
-    // Reiniciar o progresso
     setBtc(0);
     setBtcPorClique(1);
     setBtcPorSegundo(0);
-    setJogoIniciado(true); // Inicia o jogo
+    setJogoIniciado(true); 
   };
 
   const mostrarMenu = () => {
-    setJogoIniciado(false); // Exibe o menu novamente
+    setJogoIniciado(false); 
   };
 
   const comprarUpgrade = (index, categoria) => {
@@ -95,31 +93,54 @@ const ClickerGame = () => {
         </ImageBackground>
       )}
 
-      {/* Tela do Jogo */}
-      {jogoIniciado && (
-        <ImageBackground
-          source={backgroundImage} // Agora o fundo é atualizado pelo estado
-          style={[styles.backgroundImage, { width, height }]}
-          resizeMode="contain">
-          <View style={styles.gameContainer}>
-            <Text style={styles.btcText}>BTC: {btc.toFixed(2)}</Text>
-            <TouchableOpacity style={styles.lojaBtn} onPress={() => setModalVisible(true)}>
-              <Text style={styles.btnText}>Abrir Loja</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.hackearBtn} onPress={() => setBtc(prev => prev + btcPorClique)}>
-              <Text style={styles.btnText}>Hackear</Text>
-            </TouchableOpacity>
-          </View>
-        </ImageBackground>
-      )}
+{jogoIniciado && (
+  
+  <ImageBackground source={require('./assets/fundo.gif')} style={styles.imagemFundo1}>
+  
+  <ImageBackground
+    source={backgroundImage}
+    style={[styles.backgroundImage, { width, height }]}
+    resizeMode="contain"
+  >
+    
+
+
+    {/* HUD */}
+    <HUD btc={btc} score={btcPorClique} time={btcPorSegundo}/>
+
+
+    {/* Container do jogo */}
+    <View style={styles.gameContainer}>
+      
+      {/* Botão da Loja */}
+      <TouchableOpacity style={styles.lojaBtn} onPress={() => setModalVisible(true)}>
+      <ImageBackground source={require('./assets/btnloja.png')} style={styles.backgroundImage}>
+        <Text style={styles.btnText}></Text>
+      </ImageBackground>  
+      </TouchableOpacity>
+
+
+
+      {/* Botão de Hackear */}
+      <TouchableOpacity style={styles.hackearBtn} onPress={() => setBtc(prev => prev + btcPorClique)}>
+      <ImageBackground source={require('./assets/teclado.png')} style={styles.buttonBackground} resizeMode="contain">
+      </ImageBackground>  
+      </TouchableOpacity>
+    </View>
+  </ImageBackground>
+  </ImageBackground>
+)}
+
 
       <Modal visible={modalVisible} animationType="slide">
         <ImageBackground source={require('./assets/lojinha.gif')} style={[styles.backgroundImage, { width, height }]} resizeMode="contain">
+          
+          {/* HUD */}
+         <HUD btc={btc} score={btcPorClique} time={btcPorSegundo} />
+          
           <TouchableOpacity style={styles.closeBtn} onPress={() => setModalVisible(false)}>
             <Text style={styles.closeBtnText}>X</Text>
           </TouchableOpacity>
-
-          <Text style={styles.btcText2}>BTC: {btc.toFixed(2)}</Text>
 
           {/* Botões das seções */}
           <View style={styles.secaoButtons}>
@@ -157,23 +178,25 @@ const ClickerGame = () => {
 
 
 const styles = StyleSheet.create({
-
+  imagemFundo1: {
+    flex: 1, // A primeira imagem ocupa toda a área do botão
+    justifyContent: 'center', // Centraliza o conteúdo
+    alignItems: 'center', // Centraliza o conteúdo
+  },
   secaoButtons: {
+    top: height * 0.22, // 80% da altura da tela (ajuste conforme necessário)
+    left: width * 0.5 - 170, // Centraliza o botão (ajuste o valor 50 se necessário)
+    position: "absolute",
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: "space-between",
     marginVertical: 20,
   },
   secaoBtn: {
-    top:'160%',
     backgroundColor: 'rgba(56, 116, 80, 0.5)',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderWidth: 3,
-    borderColor: '#6fa341',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,  // Sombra para dispositivos Android
+    borderColor: '#6fa341', 
   },
 
   container: {
@@ -185,14 +208,17 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   backgroundImage: {
-    backgroundColor: '#16161c',
-    position:'absolute',
     flex: 1,
-    width: '100%',
-    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
+  buttonBackground: {
+    width: '100%', // Faz a imagem ocupar toda a largura do botão
+    height: '100%', // Faz a imagem ocupar toda a altura do botão
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
   menuContainer: {
     alignItems: 'center',
     textAlign: 'center',
@@ -229,6 +255,7 @@ const styles = StyleSheet.create({
   },
   
   gameContainer: {
+    position: 'absolute',
     alignItems: 'center',
     display: 'flex',
     justifyContent: 'center',
@@ -247,42 +274,40 @@ const styles = StyleSheet.create({
     color: '#a3c255',
   },
 
-  btcText2: {
-    top : '9%',
+  btnText2: {
     fontSize: 25,
-    marginBottom: 20,
-    color: 'black',
+    color: '#fff',
   },
 
   hackearBtn: {
-    top : '80%',
-    backgroundColor: 'rgba(56, 116, 80, 0.5)',
-    color: '#a3c255',
-    padding: 10,
-    marginBottom: 10,
+    position: "absolute", 
+    top: height * 0.2, 
+    backgroundColor: '#1e2029',
     borderWidth: 3,
     borderColor: '#6fa341',
-    cursor: 'pointer',
-    fontSize: 18,
-    width: '80%',
-    transition: 'background-color 0.3s ease',
+    height:112,
+    width:336, 
+    alignItems: "center",
+    justifyContent:'center',
+    textAlign: 'center',
+    borderRadius:10,
+    overflow: 'hidden'
   },
+
   lojaBtn: {
-    top : '-100%',
-    backgroundColor: 'rgba(56, 116, 80, 0.5)',
-    color: '#a3c255',
-    padding: 10,
-    marginBottom: 10,
+    position: "absolute", 
+    top: height * -0.36, 
+    left: width * 0.03, 
     borderWidth: 3,
     borderColor: '#6fa341',
     cursor: 'pointer',
-    fontSize: 18,
-    width: '80%',
     transition: 'background-color 0.3s ease',
+    width:'60',
+    height:'60',
   },
   upgradeMenu: {
     position: 'fixed',
-    top: 0,
+    top: 60,
     left: 0,
     width: '90%',
     height: '70%',
@@ -291,6 +316,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   upgradeContent: {
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
     padding: 20,
     color: 'white',
     textAlign: 'center',

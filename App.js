@@ -99,7 +99,7 @@ const ClickerGame = () => {
   
   <ImageBackground
     source={backgroundImage}
-    style={[styles.backgroundImage, { width, height }]}
+    style={[styles.backgroundImage1, { width, height }]}
     resizeMode="contain"
   >
     
@@ -133,6 +133,7 @@ const ClickerGame = () => {
 
 
       <Modal visible={modalVisible} animationType="slide">
+      <ImageBackground source={require('./assets/fundo.gif')} style={styles.imagemFundo1}></ImageBackground>
         <ImageBackground source={require('./assets/lojinha.gif')} style={[styles.backgroundImage, { width, height }]} resizeMode="contain">
           
           {/* HUD */}
@@ -207,8 +208,16 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
-  backgroundImage: {
+  backgroundImage1: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backgroundImage: {
+    position:'absolute',
+    flex: 1,
+    width: '100%',
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -273,12 +282,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#a3c255',
   },
-
   btnText2: {
     fontSize: 25,
     color: '#fff',
   },
-
   hackearBtn: {
     position: "absolute", 
     top: height * 0.2, 
@@ -307,16 +314,15 @@ const styles = StyleSheet.create({
   },
   upgradeMenu: {
     position: 'fixed',
-    top: 60,
+    top: 30,
     left: 0,
     width: '90%',
-    height: '70%',
+    height: '60%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
   },
   upgradeContent: {
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
     padding: 20,
     color: 'white',
     textAlign: 'center',

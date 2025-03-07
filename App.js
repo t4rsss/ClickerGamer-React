@@ -30,7 +30,7 @@ const ClickerGame = () => {
     ]
   });
 
-  const [secaoAtiva, setSecaoAtiva] = useState('clique');
+const [secaoAtiva, setSecaoAtiva] = useState('clique');
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -80,16 +80,27 @@ const ClickerGame = () => {
     <View style={styles.container}>
       {/* Menu Inicial */}
       {!jogoIniciado && (
-        <ImageBackground source={require('./assets/hck1.gif')} style={styles.backgroundImage}>
+        <ImageBackground source={require('./assets/hck1.gif')} style={styles.imagemFundo1}>
+        <ImageBackground source={require('./assets/logo.gif')} style={[styles.backgroundImage1, { width, height }]}
+    resizeMode="contain">
           <View style={styles.menuContainer}>
-            <Text style={styles.headerText}>Hacker Clicker</Text>
-            <TouchableOpacity style={styles.button} onPress={iniciarJogo}>
-              <Text style={styles.btnText}>Novo Jogo</Text>
+            <TouchableOpacity style={styles.buttonMenu} onPress={iniciarJogo}>
+              
+              <ImageBackground source={require('./assets/btnnewgame.gif')} style={styles.buttonBackground} resizeMode="stretch">
+                <Text style={styles.btnText}></Text>
+              </ImageBackground>  
+    
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={iniciarJogo}>
-              <Text style={styles.btnText}>Continuar</Text>
+            
+            <TouchableOpacity style={styles.buttonMenu} onPress={iniciarJogo}>
+              
+            <ImageBackground source={require('./assets/btncont.gif')} style={styles.buttonBackground} resizeMode="stretch">
+                <Text style={styles.btnText}></Text>
+              </ImageBackground>  
+            
             </TouchableOpacity>
           </View>
+          </ImageBackground>
         </ImageBackground>
       )}
 
@@ -103,11 +114,8 @@ const ClickerGame = () => {
     resizeMode="contain"
   >
     
-
-
     {/* HUD */}
     <HUD btc={btc} score={btcPorClique} time={btcPorSegundo}/>
-
 
     {/* Container do jogo */}
     <View style={styles.gameContainer}>
@@ -180,13 +188,13 @@ const ClickerGame = () => {
 
 const styles = StyleSheet.create({
   imagemFundo1: {
-    flex: 1, // A primeira imagem ocupa toda a área do botão
-    justifyContent: 'center', // Centraliza o conteúdo
-    alignItems: 'center', // Centraliza o conteúdo
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
   },
   secaoButtons: {
-    top: height * 0.22, // 80% da altura da tela (ajuste conforme necessário)
-    left: width * 0.5 - 170, // Centraliza o botão (ajuste o valor 50 se necessário)
+    top: height * 0.22, 
+    left: width * 0.5 - 170, 
     position: "absolute",
     flexDirection: 'row',
     justifyContent: "space-between",
@@ -212,6 +220,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    width: '100%',
+    height: '100%',
   },
   backgroundImage: {
     position:'absolute',
@@ -222,22 +232,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonBackground: {
-    width: '100%', // Faz a imagem ocupar toda a largura do botão
-    height: '100%', // Faz a imagem ocupar toda a altura do botão
+    width: '100%', 
+    height: '100%', 
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   menuContainer: {
+    top: height * 0.5,
+    position: "absolute",
     alignItems: 'center',
     textAlign: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
     padding: 30,
-    borderColor: '#6fa341',
-    borderWidth: 2,
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.6)',
-    width: '70%',
-    height: 300,
+    width: '80%',
+    height: '100%',
+    borderRadius:10,
   },
   headerText: {
     color: '#a3c255',
@@ -262,7 +271,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center'
   },
-  
+
+  buttonMenu: {
+    fontFamily: 'MinhaFonte',
+    color: '#a3c255',
+    top:'5%',
+    borderWidth: 4,
+    borderColor: '#1e2029',    
+    cursor: 'pointer',
+    fontSize: 18,
+    margin:10,
+    width: '396',
+    height:'72',
+  },
+
   gameContainer: {
     position: 'absolute',
     alignItems: 'center',

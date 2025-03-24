@@ -132,7 +132,7 @@
             <Array as="points" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="EBmYMHNgq1SjqCXoFnIz-13" value="1" style="resizable=0;align=left;verticalAlign=bottom;labelBackgroundColor=none;fontSize=12;direction=north;" parent="WIyWlLk6GJQsqaUBKTNV-1" connectable="0" vertex="1">
+        <mxCell id="EBmYMHNgq1SjqCXoFnIz-13" value="0" style="resizable=0;align=left;verticalAlign=bottom;labelBackgroundColor=none;fontSize=12;direction=north;" parent="WIyWlLk6GJQsqaUBKTNV-1" connectable="0" vertex="1">
           <mxGeometry x="360" y="270" as="geometry">
             <mxPoint x="8" y="-2" as="offset" />
           </mxGeometry>

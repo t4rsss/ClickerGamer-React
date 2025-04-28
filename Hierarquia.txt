@@ -1,0 +1,26 @@
++---"usuarios"
+    +---$uid
+        +---"email"
+
++---"jogadores"
+    +---$uid
+        +---"nome"
+        +---"pontuacao"
+        +---"nivel"
+        +---"faseAtual"
+
++---"compras"
+    +---$uid
+        +---$idCompra
+            +---"dataCompra"
+            +---"valor"
+            +---"nomeUpgrade"
+
++---"upgrades"
+    +---efeito
+        +---"preco"
+	+---"nivelUpgrade"	
+
++---"fases"
+    +---$idFase
+        +---"area"

@@ -1,3 +1,4 @@
+
 +---"usuarios"
     +---$uid
         +---"email"
@@ -8,10 +9,14 @@
         +---"pontuacao"
         +---"nivel"
         +---"faseAtual"
-
+        +---"listaDeCompras"
+            +---$idCompra
+                +---$idUpgrade
+                +---"valor"
+	
 +---"compras"
     +---$uid
-        +---$idCompra
+        +---$Compra
             +---"dataCompra"
             +---"valor"
             +---"nomeUpgrade"
@@ -23,4 +28,4 @@
 
 +---"fases"
     +---$idFase
-        +---"area"
+        +---"area" 
